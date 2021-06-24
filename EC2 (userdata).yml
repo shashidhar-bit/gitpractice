@@ -1,0 +1,44 @@
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName 
+    Default: Ec2_vpc_cloudformation
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  InstanceType:
+    Description: WebServer EC2 instance type
+    Type: String
+    Default: t2.micro
+Resources: 
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroups:
+      - Ref: InstanceSecurityGroup
+      KeyName:
+        Ref: KeyName
+      ImageId: ami-0c1a7f89451184c8b
+      UserData:
+         !Base64 |
+        #!/bin/bash
+         mkdir git
+         cd /
+         cd git
+         echo "this is  git indexfile" > index.html
+         git init
+         git add .
+         git commit -m "new"
+         git remote add origin https://github.com/shashidhar-bit/new.git
+         git push origin master
+         
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+  
